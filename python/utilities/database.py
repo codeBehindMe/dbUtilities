@@ -1,5 +1,6 @@
 import cx_Oracle
 import pandas as pd
+import warnings
 
 class OracleCommand:
     def __init__(self, connectionString, command=None, **kwargs):
@@ -13,8 +14,9 @@ class OracleCommand:
         Note** Does not support OAuth style authentication."""
         self.__cStr = connectionString
         self.__command = command
-        for key, value in kwargs.iteritems():
-            setattr(self, key, value)
+        if kwargs is not None:
+            for key, value in kwargs.items():
+                setattr(self, key, value)
 
     def __connect__(self):
         """Attempts to open a connection with the oracle database specified by the connection string."""
@@ -109,9 +111,20 @@ class OracleCommand:
         """Executes a SQL statement which returns a scalar value."""
         raise NotImplementedError()
 
-    def executeNonQuery(self, command):
+    def executeNonQuery(self, command=None):
+        # type: (str) -> None
         """Executes a SQL statement which does not return a value."""
-        raise NotImplementedError()
+        warnings.warn("This method is not fully tested. Be sure to view the source code before implementation.")
+
+        if command is None and self.__command is None:
+            raise ValueError("No command supplied for execution.")
+        elif command is None:
+            command = self.__command
+
+        self.__connect__()
+        self.__cursor.execute(command)
+        self.__db.commit()
+        self.__disconnect__()
 
     def executeQueryAsync(self, command):
         """Not supported."""
@@ -165,3 +178,8 @@ class OracleCommand:
 
         # Disconnect
         self.__disconnect__()
+
+    def getConnector(self):
+        # type: (None) -> cx_Oracle.connection
+
+        return cx_Oracle.connect(self.__cStr)
