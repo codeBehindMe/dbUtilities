@@ -2,6 +2,7 @@ import cx_Oracle
 import pandas as pd
 import warnings
 
+
 class OracleCommand:
     def __init__(self, connectionString, command=None, **kwargs):
         """Constructor for the OracleCommand Class.
@@ -110,6 +111,23 @@ class OracleCommand:
     def executeScalar(self, command):
         """Executes a SQL statement which returns a scalar value."""
         raise NotImplementedError()
+
+    def executeVector(self, command=None):
+        # type: (str) -> pd.DataFrame
+        """
+        This method generates a pandas data frame from a sql query.
+        :param command: SQL Query to be executed.
+        :return: Pandas dataframe containing the results of the query.
+        """
+        warnings.warn("This method is not fully tested. Be sure to view the source code before implementation.")
+        if command is None and self.__command is None:
+            raise ValueError("No command supplied for execution.")
+        elif command is None:
+            command = self.__command
+
+        _df = pd.read_sql(command, self.__cStr)
+
+        return _df
 
     def executeNonQuery(self, command=None):
         # type: (str) -> None
