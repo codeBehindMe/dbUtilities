@@ -1,6 +1,7 @@
 import cx_Oracle
 import pandas as pd
 import warnings
+import pyodbc
 
 
 class OracleCommand:
@@ -174,7 +175,7 @@ class OracleCommand:
         _dtList = self.__pandasToList__(dataFrame)
 
         # Convert any Numpy.NaN values to None for SQl.NULL recognition.
-        # TODO: ASK YUN :: Is this best handled by a method ?
+        # TODO: Can you improve this from running in O(n2)
         for i, r in enumerate(_dtList):
             for j, c in enumerate(r):
                 _dtList[i][j] = self.__castToNone__(c)
@@ -207,4 +208,27 @@ class OracleCommand:
         return cx_Oracle.connect(self.__cStr)
 
 
+class SqlServerCommand:
+    def __init__(self, connectionString, command=None, **kwargs):
+        """
+        Constructor for sql server operations class.
+        :param connectionString: Connection string to the database.
+        :param command: Optional command to be executed.
+        :param kwargs: Optional arguments for the connection string.
+        """
+        self.__cStr = connectionString
+        self.__cmd = command
 
+    def __connect__(self):
+        self.__con = pyodbc.connect(self.__cStr, autocommit=True)
+        self.__cur = self.__con.cursor()
+
+    def __disconnect__(self):
+        self.__cur.close()
+        self.__con.close()
+
+    def executeVector(self):
+        pass
+
+    def getConnector(self):
+        return pyodbc.connect(self.__cStr, autocommit=True)
