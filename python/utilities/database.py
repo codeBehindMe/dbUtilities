@@ -199,5 +199,12 @@ class OracleCommand:
 
     def getConnector(self):
         # type: (None) -> cx_Oracle.connection
+        """
+        Returns the cx_Oracle connector object from the class. Useful since things like beautiful soup prefers this object over the connection string.
+        :return: connection object.
+        """
 
         return cx_Oracle.connect(self.__cStr)
+
+
+
